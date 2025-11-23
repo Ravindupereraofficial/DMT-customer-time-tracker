@@ -1,0 +1,99 @@
+Create a comprehensive DMT (Motor Traffic Department) customer time tracking system website with the following specifications:
+
+**Technical Requirements:**
+- Use HTML, CSS, JavaScript, and React
+- Implement responsive design for mobile and desktop compatibility
+- Ensure clean, maintainable code structure
+- Make interactive website use white and blueish colour
+
+**Core Features:**
+
+1. **Multi-language Support:**
+- Default language: English
+- Additional languages: Sinhala and Tamil
+- Language selector should dynamically change all website content
+- Store language preference in local storage
+
+2. **Theme Toggle:**
+- Light mode (default) and dark mode options
+- Theme toggle button in header/navigation
+- Consistent color scheme across all pages
+- Store theme preference in local storage
+
+3. **Page Structure and Navigation:**
+
+**Page 1 - Customer Information Entry:**
+- Form fields: Vehicle Number, Contact Number, Full Name
+- Input validation for all fields
+- Professional styling with clear labels
+- select One day service or normal service  if the customer choose oneway go to page 2
+- Submit button to proceed to service selection
+- save all the customer details
+
+**Page 2 - Service Selection:**
+- Display customer information entered from Page 1
+- Service buttons: "Motor Bike Transfer" and "Car Transfer" (functional)
+- Placeholder buttons: "Dual Purpose", "Lorry Transfer", "Three Wheeler Transfer" (non-functional,  don’t navigate to any page but make visible the button)
+- Clear visual distinction between active and inactive buttons
+
+**Page 3 - Required Document:**
+Show the all required document as in the image if the customer tick all the document in the check box only make visible the next button
+
+**Page 4 - Customer Step Confirmation:**
+Each steps should display and if the first step it should be shown what to do steps in each steps after customer give mark as done button it should track the time that customer has done it as save the time. 
+Visible Customer Steps:
+
+1.Submit Documents
+What to do:
+- Go to Front Office 01
+- Submit all your required documents
+- Officer will verify if all documents are complete
+- Wait for verification to complete
+- Click "Complete This Step" when the officer returns your documents
+
+✔ You can now proceed to the next step
+
+2.Document Verification(System)
+What to do:
+- Proceed to Front Office 02
+- Your documents will be entered into the system
+- Wait while officer processes your information
+- Confirm all details are correct
+- Click "Complete This Step" when officer is done
+
+✔ You can now proceed to the next step
+
+3.Bank: Payment Process
+What to do:
+- Go to the bank counter
+- Submit your payment slip
+- Pay the required transfer fee
+- Collect the official payment receipt
+- Submit payment receipt to front office 1/2
+- Click "Complete This Step" when payment is done
+
+✔ You can now proceed to the next step
+
+4.Processing
+Waiting Area - Wait for your counter number to be called
+What to do:
+- Go to the designated waiting area
+- Your documents are being processed by back office staff
+- This includes: data entry, printing CR, examining officer review, and staff officer verification
+- Click "Complete This Step" ONLY when your counter number is called on the display
+
+✔ You can now proceed to the next step
+
+5.Completed
+What to do:
+- When your number is called, go to Front Office
+- Meet with the appointed officer
+- Receive your new vehicle registration book
+- Verify all details are correct
+- Sign the acknowledgment
+- Process complete!
+These are the steps and what to do list
+
+**Page 5 - Customer Feedback:**
+In page 5 it should show input message field and emojis to select the customer reaction of this service 
+Customer can give a message or react or do both and finish the process
