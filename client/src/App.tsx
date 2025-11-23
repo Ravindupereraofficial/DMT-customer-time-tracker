@@ -17,6 +17,7 @@ import Feedback from "./pages/Feedback";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminCustomersPage from "./pages/AdminCustomersPage";
+import AdminTimingsPage from "./pages/AdminTimingsPage";
 
 function Router() {
   return (
@@ -29,6 +30,7 @@ function Router() {
       <Route path="/admin-login" component={AdminLogin} />
       <Route path="/admin-dashboard" component={AdminDashboard} />
       <Route path="/admin-customers" component={AdminCustomersPage} />
+      <Route path="/admin-timings" component={AdminTimingsPage} />
       <Route component={NotFound} />
     </Switch>
   );

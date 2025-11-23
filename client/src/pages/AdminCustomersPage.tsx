@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { customerService, serviceService, documentService, feedbackService } from '@/lib/supabaseService';
+import { customerService, serviceService, documentService, feedbackService, stepTimingService } from '@/lib/supabaseService';
 import { ArrowLeft, Search, X } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -14,6 +14,7 @@ interface CustomerDetail {
   services: any[];
   documents: any[];
   feedback: any[];
+  stepTimings: any[];
 }
 
 export default function AdminCustomersPage() {
@@ -74,12 +75,14 @@ export default function AdminCustomersPage() {
       const services = await serviceService.getByCustomerId(customerId);
       const documents = await documentService.getByCustomerId(customerId);
       const feedback = await feedbackService.getByCustomerId(customerId);
+      const stepTimings = await stepTimingService.getByCustomerId(customerId);
 
       setSelectedCustomer({
         customer,
         services: services || [],
         documents: documents || [],
         feedback: feedback || [],
+        stepTimings: stepTimings || [],
       });
     } catch (error) {
       console.error('Error loading customer details:', error);
@@ -216,7 +219,7 @@ export default function AdminCustomersPage() {
           </Card>
 
           {/* Feedback */}
-          <Card>
+          <Card className="mb-6">
             <CardHeader>
               <CardTitle className="text-base sm:text-lg">Feedback ({selectedCustomer.feedback.length})</CardTitle>
             </CardHeader>
@@ -237,6 +240,62 @@ export default function AdminCustomersPage() {
                       <p className="text-xs sm:text-sm text-muted-foreground">{fb.feedback_text || 'No comment'}</p>
                     </div>
                   ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Step Timings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base sm:text-lg">Step Timings ({selectedCustomer.stepTimings.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {selectedCustomer.stepTimings.length === 0 ? (
+                <p className="text-xs sm:text-sm text-muted-foreground">No step timing data</p>
+              ) : (
+                <div className="space-y-3">
+                  {selectedCustomer.stepTimings.map((timing) => {
+                    const minutes = Math.floor((timing.duration_seconds || 0) / 60);
+                    const seconds = (timing.duration_seconds || 0) % 60;
+                    return (
+                      <div key={timing.id} className="border rounded-lg p-4 hover:bg-muted/30 transition">
+                        <div className="flex justify-between items-start gap-2 mb-2">
+                          <div className="flex-1">
+                            <p className="font-semibold text-sm sm:text-base">
+                              Step {timing.step_id}: {timing.step_name}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Started: {new Date(timing.start_time).toLocaleString()}
+                            </p>
+                            {timing.end_time && (
+                              <p className="text-xs text-muted-foreground">
+                                Ended: {new Date(timing.end_time).toLocaleString()}
+                              </p>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-bold text-primary">
+                              {minutes}:{seconds.toString().padStart(2, '0')}
+                            </p>
+                            <p className="text-xs text-muted-foreground">Duration</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/10">
+                    <p className="text-sm font-semibold mb-2">Total Time</p>
+                    <p className="text-2xl font-bold text-primary">
+                      {(() => {
+                        const totalSeconds = selectedCustomer.stepTimings.reduce((sum, t) => sum + (t.duration_seconds || 0), 0);
+                        const hours = Math.floor(totalSeconds / 3600);
+                        const minutes = Math.floor((totalSeconds % 3600) / 60);
+                        const seconds = totalSeconds % 60;
+                        return `${hours}h ${minutes}m ${seconds}s`;
+                      })()}
+                    </p>
+                  </div>
                 </div>
               )}
             </CardContent>

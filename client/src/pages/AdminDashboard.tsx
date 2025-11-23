@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { customerService, serviceService, documentService, feedbackService } from '@/lib/supabaseService';
+import { customerService, serviceService, documentService, feedbackService, stepTimingService } from '@/lib/supabaseService';
 import { LogOut, Users, Briefcase, FileText, MessageSquare, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -36,6 +36,7 @@ export default function AdminDashboard() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [feedbackData, setFeedbackData] = useState<FeedbackData[]>([]);
   const [serviceTypes, setServiceTypes] = useState<{ name: string; value: number }[]>([]);
+  const [timeData, setTimeData] = useState<{ name: string; time: number }[]>([]);
 
   // Redirect if not logged in
   useEffect(() => {
@@ -117,6 +118,22 @@ export default function AdminDashboard() {
         totalFeedback: allFeedback?.length || 0,
         avgRating: parseFloat(avgRating as any) || 0,
       });
+
+      // Fetch step timings for time chart
+      const timeChartData: { name: string; time: number }[] = [];
+      for (const customer of (allCustomers || []).slice(0, 10)) {
+        const timings = await stepTimingService.getByCustomerId(customer.id);
+        if (timings && timings.length > 0) {
+          const totalMinutes = Math.floor(
+            timings.reduce((sum, t) => sum + (t.duration_seconds || 0), 0) / 60
+          );
+          timeChartData.push({
+            name: customer.name.split(' ')[0], // First name only
+            time: totalMinutes,
+          });
+        }
+      }
+      setTimeData(timeChartData);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       toast.error('Failed to load dashboard data');
@@ -150,13 +167,20 @@ export default function AdminDashboard() {
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-primary">Admin Dashboard</h1>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">View all customer data and analytics</p>
           </div>
-          <div className="flex gap-2 w-full sm:w-auto">
+          <div className="flex gap-2 w-full sm:w-auto flex-wrap">
             <Button
               onClick={() => setLocation('/admin-customers')}
               variant="outline"
               className="flex-1 sm:flex-none gap-2 text-xs sm:text-sm py-2 h-auto"
             >
               👥 Customers
+            </Button>
+            <Button
+              onClick={() => setLocation('/admin-timings')}
+              variant="outline"
+              className="flex-1 sm:flex-none gap-2 text-xs sm:text-sm py-2 h-auto"
+            >
+              ⏱️ Timings
             </Button>
             <Button
               onClick={handleLogout}
@@ -204,8 +228,8 @@ export default function AdminDashboard() {
           />
         </div>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-6 mb-6 sm:mb-8">
+        {/* Charts - All in One Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-6 mb-6 sm:mb-8">
           {serviceTypes.length > 0 && (
             <Card className="overflow-hidden">
               <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-4">
@@ -248,6 +272,37 @@ export default function AdminDashboard() {
                     <YAxis />
                     <Tooltip />
                     <Bar dataKey="count" fill="#3b82f6" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
+
+          {timeData.length > 0 && (
+            <Card className="overflow-hidden">
+              <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-4">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-base sm:text-lg">Time Analytics</CardTitle>
+                  <Button
+                    onClick={() => setLocation('/admin-timings')}
+                    size="sm"
+                    variant="outline"
+                    className="text-xs"
+                  >
+                    View All
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-2 sm:p-6 pt-0">
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={timeData.slice(0, 5)}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip 
+                      formatter={(value: number) => [`${value} min`, 'Time']}
+                    />
+                    <Bar dataKey="time" fill="#10b981" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Language, translations } from '../lib/translations';
+import { stepTimingService } from '../lib/supabaseService';
 
 interface CustomerDetails {
   vehicleNumber: string;
@@ -95,10 +96,39 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const completeStep = (stepId: number) => {
+  const completeStep = async (stepId: number) => {
+    const endTime = Date.now();
+    const customerId = localStorage.getItem('dmt_customer_id');
+    const serviceId = localStorage.getItem('dmt_service_id');
+    
+    // Update local state
     setStepTimings(prev => prev.map(s => 
-      s.stepId === stepId ? { ...s, endTime: Date.now() } : s
+      s.stepId === stepId ? { ...s, endTime } : s
     ));
+
+    // Save to database
+    if (customerId) {
+      try {
+        const currentTiming = stepTimings.find(s => s.stepId === stepId);
+        if (currentTiming) {
+          const durationSeconds = Math.floor((endTime - currentTiming.startTime) / 1000);
+          const stepNames = ['Documents', 'Verification', 'Payment', 'Processing', 'Completed'];
+          
+          await stepTimingService.create({
+            customer_id: customerId,
+            service_id: serviceId || undefined,
+            step_id: stepId,
+            step_name: stepNames[stepId - 1] || `Step ${stepId}`,
+            start_time: new Date(currentTiming.startTime).toISOString(),
+            end_time: new Date(endTime).toISOString(),
+            duration_seconds: durationSeconds,
+          });
+        }
+      } catch (error) {
+        console.error('Error saving step timing:', error);
+      }
+    }
+
     setCurrentStep(stepId + 1);
     startStep(stepId + 1); // Auto start next step
   };

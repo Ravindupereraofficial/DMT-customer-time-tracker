@@ -53,6 +53,18 @@ export interface StepConfirmation {
   created_at?: string;
 }
 
+export interface StepTiming {
+  id?: string;
+  customer_id: string;
+  service_id?: string;
+  step_id: number;
+  step_name: string;
+  start_time: string;
+  end_time?: string;
+  duration_seconds?: number;
+  created_at?: string;
+}
+
 // Customer Operations
 export const customerService = {
   async create(customer: Customer) {
@@ -299,6 +311,66 @@ export const stepConfirmationService = {
 
     if (error) {
       console.error('Error updating step confirmation:', error);
+      throw error;
+    }
+    return data;
+  },
+};
+
+// Step Timing Operations
+export const stepTimingService = {
+  async create(stepTiming: StepTiming) {
+    const { data, error } = await supabase
+      .from('step_timings')
+      .insert([stepTiming])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating step timing:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  async getByCustomerId(customerId: string) {
+    const { data, error } = await supabase
+      .from('step_timings')
+      .select('*')
+      .eq('customer_id', customerId)
+      .order('step_id', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching step timings:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  async getByServiceId(serviceId: string) {
+    const { data, error } = await supabase
+      .from('step_timings')
+      .select('*')
+      .eq('service_id', serviceId)
+      .order('step_id', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching step timings by service:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  async update(id: string, stepTiming: Partial<StepTiming>) {
+    const { data, error } = await supabase
+      .from('step_timings')
+      .update(stepTiming)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating step timing:', error);
       throw error;
     }
     return data;
